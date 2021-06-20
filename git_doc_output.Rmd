@@ -168,16 +168,22 @@ franchise_join_data <- data.frame(franchise_join_data)
 
 #Fanchise and Team stat joint data
 franchise_team_stat <- inner_join(franchise_join_data, teams_stat, by = "data.id")
+franchise_team_join <- franchise_team_stat
 franchise_team_stat <- franchise_team_stat %>% select("franchiseID"="data.id","teams.id", "teams.firstYearOfPlay", "teams.active","teams.venue.city","teams.venue.id","teams.division.id","teams.division.name", "teams.conference.id", "teams.conference.name" ) %>% na.omit()
 franchise_team_stat
 ```
 ## You should create at least two new variables that are functions of the variables from a data set you use
 ```{r}
-res <- GET(paste0(paste0(base_url, "/", "franchise-goalie-records",urlExtention,12)))
-goli_12_data <- fromJSON(rawToChar(res$content), flatten = TRUE) 
-goli_12_data <- goli_12_data %>% data.frame(goli_12_data) %>% select(data.activePlayer, data.firstName, data.franchiseName, data.gamesPlayed, data.lastName, data.gameTypeId, data.playerId, data.mostGoalsAgainstOneGame, data.ties, data.wins, data.losses ) %>% mutate(winRate= round(data.wins/data.gamesPlayed, 2) , lossRate= round(data.losses/data.gamesPlayed,2))
-goli_12_data
+WinLossRate <- function() {
+  res <- GET(paste0(paste0(base_url, "/", "franchise-goalie-records",urlExtention,12)))
+  goli_12_data <- fromJSON(rawToChar(res$content), flatten = TRUE) 
+  goli_12_data <- goli_12_data %>% data.frame(goli_12_data) %>% select(data.activePlayer, data.firstName, data.franchiseName, data.gamesPlayed, data.lastName, data.gameTypeId, data.playerId, data.mostGoalsAgainstOneGame, data.ties, data.wins, data.losses ) %>% mutate(winRate= round(data.wins/data.gamesPlayed, 2) , lossRate= round(data.losses/data.gamesPlayed,2))
+  return (goli_12_data)
+}
 
+
+goli_12_data <- WinLossRate ()
+goli_12_data
 ```
 ### You should create some contingency tables. 
 ```{r}
@@ -210,6 +216,38 @@ getSummary <- function() {
 }
   getSummary()
 ```
+### create at least five plots utilizing coloring, grouping, etc. All plots should have nice labels and titles.
+```{r}
+goli_12_box <- ggplot(data=goli_12_data, aes(x=data.activePlayer))
+goli_12_box + geom_bar(aes(fill= data.activePlayer), position = "dodge") + labs(title = "Active/inactive players Bar plot")
+```
+```{r}
+ggplot(goli_12_data, aes(x=data.gamesPlayed)) + geom_histogram(aes(y = ..density.., fill = winRate), bins = 26) + geom_density(adjust=0.4, alpha=0.4, color = "red", size = 2,outline.type="full", position = "stack") + labs(title="Histogram for Goli 12 win rate")
+```
+### Scatterplot
+Scatterplot is a good visualization tool. It is comparing games played vs win rate for goli 12.Win rate is seems to be decreased for Goli 12 as the number of games increased. 
+
+
+```{r  echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(goli_12_data, aes(x=data.gamesPlayed, y=winRate)) + geom_point(aes(col=data.gamesPlayed, group=data.gamesPlayed)) + labs(title = "Games Played vs Win Rate")
+```
+```{r}
+ggplot (goli_12_data, aes(x=data.gamesPlayed, y=data.wins, group=data.activePlayer)) + geom_point(aes(color= data.activePlayer)) + geom_smooth(method='lm', color='light blue') + ggtitle("Games played vs Wins")
+```
+
+```{r}
+goli_12_box2<- ggplot(data= goli_12_data, aes(x=data.gamesPlayed, y= data.losses, group=data.activePlayer, color=data.activePlayer))
+goli_12_box2 + geom_boxplot() + labs(title="Boxplot of games played and losses by individual players") + geom_jitter(aes(color=data.activePlayer))
+```
+
+```{r}
+goli_12_box_data <- goli_12_data %>% select(data.activePlayer, data.gamesPlayed) 
+histogram1<- ggplot(data=goli_12_box_data, aes(x=data.gamesPlayed))
+histogram1 + geom_histogram(binwidth = 10, aes(fill= data.activePlayer)) + labs(title="Histogram for games Played") +
+  geom_density(adjust= 0.25, alpha=0.05)
+```
+
+
 
 
 
