@@ -17,6 +17,7 @@ library("jsonlite")
 library("dplyr")
 library("kableExtra")
 library("knitr")
+library("summarytools")
 ```
 
 
@@ -189,6 +190,27 @@ kable(table(goli_12_data$data.gamesPlayed, goli_12_data$data.activePlayer)) %>% 
 #Contingency table for #player last name, most goals against one game and if player is active
 kable(table(goli_12_data$data.lastName,goli_12_data$data.mostGoalsAgainstOneGame, goli_12_data$data.activePlayer)) %>% kable_styling()
 ```
+
+### Numerical summaries for some quantitative variables at each setting of some of your categorical variables
+
+```{r}
+gameSummary <- function(moreThanGames) {
+ goli_12_game_smry <- goli_12_data %>% filter(data.gamesPlayed > moreThanGames) %>% select(data.firstName,data.gamesPlayed, winRate, lossRate)
+}
+goli_12_game_smry <- gameSummary(100)
+goli_12_game_smry
+
+```
+```{r}
+getSummary <- function() {
+  goli_12_game_smry<- descr(goli_12_game_smry,stats = c("min","Q1","med", "mean", "Q3", "max"))
+  goli_12_game_smry <- data.frame(goli_12_game_smry)
+  goli_12_game_smry <- round(goli_12_game_smry, digits = 1)
+  return(goli_12_game_smry)
+}
+  getSummary()
+```
+
 
 
 
