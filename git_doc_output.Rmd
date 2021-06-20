@@ -190,7 +190,7 @@ franchise_join_data <- data.frame(franchise_join_data)
 #Fanchise and Team stat joint data
 franchise_team_stat <- inner_join(franchise_join_data, teams_stat, by = "data.id")
 franchise_team_stat <- franchise_team_stat %>% select("franchiseID"="data.id","teams.id", "teams.firstYearOfPlay", "teams.active","teams.venue.city","teams.venue.id","teams.division.id","teams.division.name", "teams.conference.id", "teams.conference.name" ) %>% na.omit()
-franchise_team_stat
+head(franchise_team_stat)
 ```
 ### Create new variables
 Used franchise-goalie-records table for further analysis. Created new variables winRate and lossRate using mutate function. Mutate function adds these predictor variables in the existing dataset. 
@@ -205,7 +205,7 @@ WinLossRate <- function() {
 
 
 goli_12_data <- WinLossRate ()
-goli_12_data
+head(goli_12_data)
 ```
 ### Contingency Tables
 1) Contingency table for mostGoalsAgainstOneGame and player's lastName. This is two way contingency table. We used table() function to create contingency tables.
@@ -214,7 +214,7 @@ goli_12_data
 
 ```{r}
 
-kable( table(goli_12_data %>% group_by(data.mostGoalsAgainstOneGame) %>% select(data.mostGoalsAgainstOneGame, data.lastName))) %>% kable_styling()
+kable( table(head(goli_12_data) %>% group_by(data.mostGoalsAgainstOneGame) %>% select(data.mostGoalsAgainstOneGame, data.lastName))) %>% kable_styling() 
 
 #Contingency table for #games played and if player is active
 kable(table(goli_12_data$data.gamesPlayed, goli_12_data$data.activePlayer)) %>% kable_styling()
