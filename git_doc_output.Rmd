@@ -178,9 +178,16 @@ goli_12_data <- goli_12_data %>% data.frame(goli_12_data) %>% select(data.active
 goli_12_data
 
 ```
-### You should create some contingency tables
+### You should create some contingency tables. 
 ```{r}
 
+kable( table(goli_12_data %>% group_by(data.mostGoalsAgainstOneGame) %>% select(data.mostGoalsAgainstOneGame, data.lastName))) %>% kable_styling()
+
+#Contingency table for #games played and if player is active
+kable(table(goli_12_data$data.gamesPlayed, goli_12_data$data.activePlayer)) %>% kable_styling()
+
+#Contingency table for #player last name, most goals against one game and if player is active
+kable(table(goli_12_data$data.lastName,goli_12_data$data.mostGoalsAgainstOneGame, goli_12_data$data.activePlayer)) %>% kable_styling()
 ```
 
 
