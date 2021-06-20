@@ -3,30 +3,188 @@ title: "ST_558_NHL_Project"
 author: "Pramodini Karwande"
 date: "6/13/2021"
 output: 
-    github_document: default
     html_document: default  
+    github_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = FALSE , eval = TRUE, warning = FALSE, message = FALSE)
+```
+```{r }
+# section that notes the required packages needed to run the code
+library("httr")
+library("jsonlite")
+library("dplyr")
+library("kableExtra")
+library("knitr")
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# NHL records API
+###You should write functions to contact the NHL records API for the endpoints listed below. The functions should return well-formatted, parsed data (usually a data frame). Where possible, the user should have the option to specify the franchise of choice by both name and ID number - you’ll need to map the names to ID numbers yourself.
+```{r }
+#Grab base URL for API
+base_url <- "https://records.nhl.com/site/api"
+urlExtention <- "?cayenneExp=franchiseId="
+reqID <- ""
+team_stat_url <- "https://statsapi.web.nhl.com/api/v1/teams"
+team_extend_url <- "?expand=team.stats"
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+getNhlData<- function(franchiseID=NULL, franchiseName=NULL, tab_name=NULL) {
+reqID <-  getID(franchiseID, franchiseName, tab_name)
 
-```{r cars}
-summary(cars)
+if(tab_name == "franchise-detail")
+{
+  urlExtention <- "?cayenneExp=mostRecentTeamId="
+}
+
+if(!is.null(reqID)) {
+  full_url <- paste0(base_url, "/", tab_name,urlExtention,reqID)
+}
+else {
+  if((tab_name == "franchise-team-totals") || (tab_name == "franchise") ) {
+    full_url <- paste0(base_url, "/", tab_name)
+  }
+}
+
+# GET request to API
+res <- GET(full_url)
+
+franchise_data <- fromJSON(rawToChar(res$content), flatten = TRUE)
+franchise_data <- data.frame(franchise_data)
+
+if(tab_name == "franchise") {
+  franchiseDataTab <- franchise_data %>% mutate("Team"=  paste0(data.teamPlaceName," ",data.teamCommonName)) %>% select("ID" = data.id, "First Season Id"= data.firstSeasonId, "Last Season Id"= data.lastSeasonId, Team)
+  #franchiseDataTab <- na.omit(franchiseDataTab)
+  knitr::kable(franchiseDataTab, caption = "NHL Data") %>% kable_styling()
+}
+else {
+  knitr::kable(franchise_data, caption = "NHL Data") %>% kable_styling()
+}
+}
+
+
+getID <- function(franchiseID=NULL, franchiseName=NULL, tab_name=NULL){
+  retVal <- NULL
+  if (!is.null(franchiseID)) {
+    retVal<- franchiseID
+    return(retVal)
+  }
+  else if (!is.null(franchiseName)) {
+    retVal <- getName(franchiseName)
+    return(retVal)
+  }
+  else {
+    return(retVal)
+  }
+}
+
+getName <- function(franchiseName=NULL) {
+    tab_name <- "franchise"
+    full_url <- paste0(base_url, "/", tab_name)
+    res <- GET(full_url)
+
+    franchiseNameData <- fromJSON(rawToChar(res$content), flatten = TRUE)
+    franchiseNameData <- data.frame(franchiseNameData)
+    franchiseID <- franchiseNameData %>% filter(data.fullName == franchiseName) %>% select(data.id)
+
+    return(franchiseID)
+} 
+
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+# NHL stats API
+###You should write a function to contact the NHL stats API for the ?expand=team.stats modifier. The function should be able to take a single team or return data from all teams.
+```{r}
+getNHLTeamStatsData <- function(teamID=NULL) {
+  if (!is.null(teamID)) {
+    team_stat_full_url <- paste0(team_stat_url,"/",teamID,team_extend_url)
+  }
+  else {
+    team_stat_full_url <- paste0(team_stat_url,team_extend_url)
+  }
+  
+  res <- GET(team_stat_full_url)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+    team_stat_data <- fromJSON(rawToChar(res$content), flatten = TRUE)
+    team_stat_data <- data.frame(team_stat_data)
+    knitr::kable(team_stat_data, caption = "NHL Team Stat Data") %>% kable_styling()
+}
+
+# *****************TESTING START***********************
+ getNHLTeamStatsData(NULL)
+ getNHLTeamStatsData(3)
+# *****************TESTING END***********************
+```
+#Wrapper Function
+###You should write a wrapper function that is essentially a one-stop-shop for the user to access any of the API endpoints you did above. That is, this function should simply call the appropriate endpoint as per the users request (including any modifiers, teamIDs, etc.)
+```{r }
+
+nhlWrapper <- function(nhlDataRequest, franchiseID=NULL,franchiseName=NULL, tab_name=NULL) {
+  output = switch (nhlDataRequest,
+    "/franchise"                = getNhlData(franchiseID,franchiseName,"franchise"),
+    "/franchise-team-totals"    = getNhlData(franchiseID,franchiseName,"franchise-team-totals"),
+    "/franchise-season-records" = getNhlData(franchiseID,NULL,"franchise-season-records"),
+    "/franchise-goalie-records" = getNhlData(franchiseID,NULL,"franchise-goalie-records"),
+    "/franchise-skater-records" = getNhlData(franchiseID,NULL,"franchise-skater-records"),
+    "/franchise-detail"         = getNhlData(franchiseID,NULL,"franchise-detail"),
+    "/individual-team-stat"     = getNHLTeamStatsData(teamID = 2),
+    "/teams-stat"               = getNHLTeamStatsData(NULL),
+    )
+  return(output)
+}
+
+# *****************TESTING START***********************
+
+nhlWrapper("/franchise",NULL, NULL, "franchise" )
+nhlWrapper("/franchise-team-totals",NULL, NULL, "franchise-team-totals" )
+nhlWrapper("/franchise-season-records",3, NULL, "franchise-season-records" )
+nhlWrapper("/franchise-goalie-records",8, NULL, "franchise-goalie-records" )
+nhlWrapper("/franchise-skater-records",4, NULL, "franchise-skater-records" )
+nhlWrapper("/franchise-detail",2, NULL, "franchise-detail" )
+#getNhlData(NULL, "Montreal Wanderers", "franchise")
+#getNhlData(6, "Montreal Wanderers", NULL)
+#getNhlData(NULL, NULL, NULL)
+
+# *****************TESTING END***********************
+```
+# Exploratory Data Analysis (EDA)
+
+### Data from at least two endpoints (possibly combining them into one)
+```{r}
+#Team Stat data
+res <- GET(paste0(team_stat_url,team_extend_url))
+teams_stat <- fromJSON(rawToChar(res$content), flatten = TRUE)
+teams_stat <- data.frame(teams_stat) %>% rename("data.id"="teams.franchiseId")
+
+# Franchise data
+res <- GET(paste0(base_url, "/", "franchise"))
+franchise_join_data <- fromJSON(rawToChar(res$content), flatten = TRUE)
+franchise_join_data <- data.frame(franchise_join_data)
+
+
+#Fanchise and Team stat joint data
+franchise_team_stat <- inner_join(franchise_join_data, teams_stat, by = "data.id")
+franchise_team_stat <- franchise_team_stat %>% select("franchiseID"="data.id","teams.id", "teams.firstYearOfPlay", "teams.active","teams.venue.city","teams.venue.id","teams.division.id","teams.division.name", "teams.conference.id", "teams.conference.name" ) %>% na.omit()
+franchise_team_stat
+```
+## You should create at least two new variables that are functions of the variables from a data set you use
+```{r}
+res <- GET(paste0(paste0(base_url, "/", "franchise-goalie-records",urlExtention,12)))
+goli_12_data <- fromJSON(rawToChar(res$content), flatten = TRUE) 
+goli_12_data <- goli_12_data %>% data.frame(goli_12_data) %>% select(data.activePlayer, data.firstName, data.franchiseName, data.gamesPlayed, data.lastName, data.gameTypeId, data.playerId, data.mostGoalsAgainstOneGame, data.ties, data.wins, data.losses ) %>% mutate(winRate= round(data.wins/data.gamesPlayed, 2) , lossRate= round(data.losses/data.gamesPlayed,2))
+goli_12_data
+
+```
+### You should create some contingency tables
+```{r}
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
