@@ -8,9 +8,24 @@ output:
     toc: yes
 ---
 
+# ST558 : National Hockey League(NHL) Data Analysis
+NHL is professional _ice hokey league_ in the world and is one of the major professional sports league in the United States.We will be doing data analysis using NHL records api and NHL stats api. 
+Project 1 involves creating a `**vignette**` and summerizing data from **NHL API**.
+
+Below in the knitr options, I have set echo true to show the code work, evaluation true and hided the warning and messages which appears due to including required libraries, or if any function got deprecated and suggest to use valid options, etc...
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE , eval = TRUE, warning = FALSE, message = FALSE)
 ```
+
+## List of Required  libraries
+ "httr"        : httr is designed to map closely to the underlying http protocol.
+ "jsonlite"    : The jsonlite package is a JSON parser/generator optimized for the web. Its main strength is that it implements a bidirectional mapping between JSON data and the most important R data types. 
+ "dplyr"       : dplyr provides the set of data manipulation tools, functions like group_by, summarise,...
+ "kableExtra"  :  kableExtra is a light weight table generator coming from 'knitr'.
+ "knitr"       :  knitr provides full control of the output without heavy coding work. I used for options to show the code chunks from RMarkdown and hide the warnings, messages generating from code with one liner coding.
+ "summarytools": I used summarytools to fetch min, max, Q1,... data
+ "ggplot2"     : Using ggplot2, I able to generate scatter plot, boxplot, histogram, bar chart for  EDA
 ```{r }
 # section that notes the required packages needed to run the code
 library("httr")
@@ -23,8 +38,11 @@ library("ggplot2")
 ```
 
 
-# NHL records API
-###You should write functions to contact the NHL records API for the endpoints listed below. The functions should return well-formatted, parsed data (usually a data frame). Where possible, the user should have the option to specify the franchise of choice by both name and ID number - you’ll need to map the names to ID numbers yourself.
+## NHL Records API Functions
+Below are the functions to contact the NHL records API for the endpoints listed below. The functions are accessing API and displaying the part of data here for the reference.The user have the option to specify the franchise of choice by both name and ID number. 
+
+Below in the code, I declared variables which are having the common value which can be used through out in this program. Used paste0 function to join the string to make url with common string (like base url) and requirement specific string (like franchise ID). Used kable function which helped to generate and style HTML table. Verified the null values if we are getting null value from user.
+
 ```{r }
 #Grab base URL for API
 base_url <- "https://records.nhl.com/site/api"
@@ -59,14 +77,14 @@ franchise_data <- data.frame(franchise_data)
 if(tab_name == "franchise") {
   franchiseDataTab <- franchise_data %>% mutate("Team"=  paste0(data.teamPlaceName," ",data.teamCommonName)) %>% select("ID" = data.id, "First Season Id"= data.firstSeasonId, "Last Season Id"= data.lastSeasonId, Team)
   #franchiseDataTab <- na.omit(franchiseDataTab)
-  knitr::kable(franchiseDataTab, caption = "NHL Data") %>% kable_styling()
+  knitr::kable(head(franchiseDataTab), caption = tab_name) %>% kable_styling()
 }
 else {
-  knitr::kable(franchise_data, caption = "NHL Data") %>% kable_styling()
+  knitr::kable(head(franchise_data), caption = tab_name) %>% kable_styling()
 }
 }
 
-
+# verify if user provided ID or franchise name or both are null.
 getID <- function(franchiseID=NULL, franchiseName=NULL, tab_name=NULL){
   retVal <- NULL
   if (!is.null(franchiseID)) {
@@ -82,6 +100,7 @@ getID <- function(franchiseID=NULL, franchiseName=NULL, tab_name=NULL){
   }
 }
 
+# map Name to ID to get franchise data.
 getName <- function(franchiseName=NULL) {
     tab_name <- "franchise"
     full_url <- paste0(base_url, "/", tab_name)
@@ -98,8 +117,8 @@ getName <- function(franchiseName=NULL) {
 ```
 
 
-# NHL stats API
-###You should write a function to contact the NHL stats API for the ?expand=team.stats modifier. The function should be able to take a single team or return data from all teams.
+## NHL Stats API Function
+Below is a function to contact the NHL stats API for the ?expand=team.stats modifier. The function is able to take a single team or return data from all teams. Here, API url is different for all teams and individual player. Verified it using the if, else function and redirect API call accordingly.
 ```{r}
 getNHLTeamStatsData <- function(teamID=NULL) {
   if (!is.null(teamID)) {
@@ -113,7 +132,7 @@ getNHLTeamStatsData <- function(teamID=NULL) {
 
     team_stat_data <- fromJSON(rawToChar(res$content), flatten = TRUE)
     team_stat_data <- data.frame(team_stat_data)
-    knitr::kable(team_stat_data, caption = "NHL Team Stat Data") %>% kable_styling()
+    knitr::kable(head(team_stat_data), caption = "NHL Team Stat Data") %>% kable_styling()
 }
 
 # *****************TESTING START***********************
@@ -122,7 +141,7 @@ getNHLTeamStatsData <- function(teamID=NULL) {
 # *****************TESTING END***********************
 ```
 #Wrapper Function
-###You should write a wrapper function that is essentially a one-stop-shop for the user to access any of the API endpoints you did above. That is, this function should simply call the appropriate endpoint as per the users request (including any modifiers, teamIDs, etc.)
+Wrapper function : that is essentially a one-stop-shop for the user to access any of the API endpoints listed for the project study. This function simply calls the appropriate endpoint as per the users request (including any modifiers, teamIDs, etc.). This is achieved using switch case based on user request. All the requests call is done and tested based on ST 558- Project.
 ```{r }
 
 nhlWrapper <- function(nhlDataRequest, franchiseID=NULL,franchiseName=NULL, tab_name=NULL) {
@@ -153,9 +172,9 @@ nhlWrapper("/franchise-detail",2, NULL, "franchise-detail" )
 
 # *****************TESTING END***********************
 ```
-# Exploratory Data Analysis (EDA)
+## Exploratory Data Analysis (EDA)
 
-### Data from at least two endpoints (possibly combining them into one)
+Data from at least two endpoints (possibly combining them into one). Here I used inner join function to join data from team stats and Franchise dataset. Used select function to get only limited columns from this joined data.  I had to call api again since my wrapper  function is using kable function on dataset in order to test and provide details on readme file and kable datatype can not be used to performed actions like select, group_by,...
 ```{r}
 #Team Stat data
 res <- GET(paste0(team_stat_url,team_extend_url))
@@ -173,7 +192,9 @@ franchise_team_stat <- inner_join(franchise_join_data, teams_stat, by = "data.id
 franchise_team_stat <- franchise_team_stat %>% select("franchiseID"="data.id","teams.id", "teams.firstYearOfPlay", "teams.active","teams.venue.city","teams.venue.id","teams.division.id","teams.division.name", "teams.conference.id", "teams.conference.name" ) %>% na.omit()
 franchise_team_stat
 ```
-## You should create at least two new variables that are functions of the variables from a data set you use
+### Create new variables
+Used franchise-goalie-records table for further analysis. Created new variables winRate and lossRate using mutate function. Mutate function adds these predictor variables in the existing dataset. 
+
 ```{r}
 WinLossRate <- function() {
   res <- GET(paste0(paste0(base_url, "/", "franchise-goalie-records",urlExtention,12)))
@@ -186,7 +207,11 @@ WinLossRate <- function() {
 goli_12_data <- WinLossRate ()
 goli_12_data
 ```
-### You should create some contingency tables. 
+### Contingency Tables
+1) Contingency table for mostGoalsAgainstOneGame and player's lastName. This is two way contingency table. We used table() function to create contingency tables.
+2)  Contingency tables created for games played and if player is active. This is two way contingency table. Observation is data is mostly  available for Inactive Players. There are only 3 players active for the games played #9, #34 and #105.
+3) Three way contingency table for goli's lastname, most goals against one game and active player. It created 2 tables, first with inactive player and another one with active player. I see all the records in one table due to kable function. 
+
 ```{r}
 
 kable( table(goli_12_data %>% group_by(data.mostGoalsAgainstOneGame) %>% select(data.mostGoalsAgainstOneGame, data.lastName))) %>% kable_styling()
@@ -198,7 +223,8 @@ kable(table(goli_12_data$data.gamesPlayed, goli_12_data$data.activePlayer)) %>% 
 kable(table(goli_12_data$data.lastName,goli_12_data$data.mostGoalsAgainstOneGame, goli_12_data$data.activePlayer)) %>% kable_styling()
 ```
 
-### Numerical summaries for some quantitative variables at each setting of some of your categorical variables
+### Numerical summaries for some quantitative variables
+Created Function to get data filtered having more than 100 games. User can mention this input value which he wants to generate the game summary. Subset goli 12 data for games played by goli 12, winRate and lossRate which are newly created 2 columns. 
 
 ```{r}
 gameSummary <- function(moreThanGames) {
@@ -208,6 +234,7 @@ goli_12_game_smry <- gameSummary(100)
 goli_12_game_smry
 
 ```
+Summary, min/max, median, mean, Q1/Q3  is generated based on above filtered data. On an average 280 games played with max win rate. 
 ```{r}
 getSummary <- function() {
   goli_12_game_smry<- descr(goli_12_game_smry,stats = c("min","Q1","med", "mean", "Q3", "max"))
@@ -217,30 +244,43 @@ getSummary <- function() {
 }
   getSummary()
 ```
-### create at least five plots utilizing coloring, grouping, etc. All plots should have nice labels and titles.
+## PLOTS :
+### 1) Bar plot : Active/inactive players Bar plot 
+This is Bar plot created for active player using geom_bar function. Counts for the inactive player is way more than active player. 
 ```{r}
 goli_12_box <- ggplot(data=goli_12_data, aes(x=data.activePlayer))
 goli_12_box + geom_bar(aes(fill= data.activePlayer), position = "dodge") + labs(title = "Active/inactive players Bar plot")
 ```
+ 
+### 2) Histogram Plot : Histogram Plot for goli 12 games played and win rate.
+The observation is we see win rate is more in the beginning. As the games are increasing, winning rate is decreasing.
 ```{r}
 ggplot(goli_12_data, aes(x=data.gamesPlayed)) + geom_histogram(aes(y = ..density.., fill = winRate), bins = 26) + geom_density(adjust=0.4, alpha=0.4, color = "red", size = 2,outline.type="full", position = "stack") + labs(title="Histogram for Goli 12 win rate")
 ```
-### Scatterplot
+
+### 3) Scatterplot : Games Played vs Win Rate
 Scatterplot is a good visualization tool. It is comparing games played vs win rate for goli 12.Win rate is seems to be decreased for Goli 12 as the number of games increased. 
 
 
 ```{r  echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 ggplot(goli_12_data, aes(x=data.gamesPlayed, y=winRate)) + geom_point(aes(col=data.gamesPlayed, group=data.gamesPlayed)) + labs(title = "Games Played vs Win Rate")
 ```
+
+### 4) ScatterP Plot : Games played vs Wins
+The active players has larger width, which can be the effect of very lower number of players .I used geom_point here. The point geom is used to create scatterplots.
 ```{r}
 ggplot (goli_12_data, aes(x=data.gamesPlayed, y=data.wins, group=data.activePlayer)) + geom_point(aes(color= data.activePlayer)) + geom_smooth(method='lm', color='light blue') + ggtitle("Games played vs Wins")
 ```
 
+### 5) Box Plot: Boxplot of games played and losses by individual players
+More games are loose by inactive players where as oberving at median, high number of games are lost by active players 
 ```{r}
 goli_12_box2<- ggplot(data= goli_12_data, aes(x=data.gamesPlayed, y= data.losses, group=data.activePlayer, color=data.activePlayer))
 goli_12_box2 + geom_boxplot() + labs(title="Boxplot of games played and losses by individual players") + geom_jitter(aes(color=data.activePlayer))
 ```
 
+### 6) Histogram Plot : Histogram for games Played
+Two colors shows different categores - active and inactive players. Inactive players have played large number of games. This graph is right skewed.Large number of players played less than 5 games.
 ```{r}
 goli_12_box_data <- goli_12_data %>% select(data.activePlayer, data.gamesPlayed) 
 histogram1<- ggplot(data=goli_12_box_data, aes(x=data.gamesPlayed))
