@@ -10,7 +10,7 @@ output:
 
 # ST558 : National Hockey League(NHL) Data Analysis
 NHL is professional _ice hokey league_ in the world and is one of the major professional sports league in the United States.We will be doing data analysis using NHL records api and NHL stats api. 
-Project 1 involves creating a `**vignette**` and summerizing data from **NHL API**.
+Project 1 involves creating a **vignette** and summerizing data from **NHL API**.
 
 Below in the knitr options, I have set echo true to show the code work, evaluation true and hided the warning and messages which appears due to including required libraries, or if any function got deprecated and suggest to use valid options, etc...
 
@@ -136,8 +136,8 @@ getNHLTeamStatsData <- function(teamID=NULL) {
 }
 
 # *****************TESTING START***********************
- getNHLTeamStatsData(NULL)
- getNHLTeamStatsData(3)
+ #getNHLTeamStatsData(NULL)
+ #getNHLTeamStatsData(3)
 # *****************TESTING END***********************
 ```
 #Wrapper Function
@@ -164,8 +164,8 @@ nhlWrapper("/franchise",NULL, NULL, "franchise" )
 nhlWrapper("/franchise-team-totals",NULL, NULL, "franchise-team-totals" )
 nhlWrapper("/franchise-season-records",3, NULL, "franchise-season-records" )
 nhlWrapper("/franchise-goalie-records",8, NULL, "franchise-goalie-records" )
-nhlWrapper("/franchise-skater-records",4, NULL, "franchise-skater-records" )
-nhlWrapper("/franchise-detail",2, NULL, "franchise-detail" )
+#nhlWrapper("/franchise-skater-records",4, NULL, "franchise-skater-records" )
+#nhlWrapper("/franchise-detail",2, NULL, "franchise-detail" )
 #getNhlData(NULL, "Montreal Wanderers", "franchise")
 #getNhlData(6, "Montreal Wanderers", NULL)
 #getNhlData(NULL, NULL, NULL)
