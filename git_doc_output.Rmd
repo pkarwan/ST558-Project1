@@ -19,13 +19,13 @@ knitr::opts_chunk$set(echo = TRUE , eval = TRUE, warning = FALSE, message = FALS
 ```
 
 ## List of Required  libraries
- "httr"        : httr is designed to map closely to the underlying http protocol.
- "jsonlite"    : The jsonlite package is a JSON parser/generator optimized for the web. Its main strength is that it implements a bidirectional mapping between JSON data and the most important R data types. 
- "dplyr"       : dplyr provides the set of data manipulation tools, functions like group_by, summarise,...
- "kableExtra"  :  kableExtra is a light weight table generator coming from 'knitr'.
- "knitr"       :  knitr provides full control of the output without heavy coding work. I used for options to show the code chunks from RMarkdown and hide the warnings, messages generating from code with one liner coding.
- "summarytools": I used summarytools to fetch min, max, Q1,... data
- "ggplot2"     : Using ggplot2, I able to generate scatter plot, boxplot, histogram, bar chart for  EDA
+"httr"        : httr is designed to map closely to the underlying http protocol.  
+"jsonlite"    : The jsonlite package is a JSON parser/generator optimized for the web. Its main strength is that it implements a bidirectional mapping between JSON data and the most important R data types.  
+"dplyr"       : dplyr provides the set of data manipulation tools, functions like group_by, summarise,...  
+"kableExtra"  :  kableExtra is a light weight table generator coming from 'knitr'.  
+"knitr"       :  knitr provides full control of the output without heavy coding work. I used for options to show the code chunks from RMarkdown and hide the warnings, messages generating from code with one liner coding.  
+"summarytools": I used summarytools to fetch min, max, Q1,... data  
+"ggplot2"     : Using ggplot2, I able to generate scatter plot, boxplot, histogram, bar chart for  EDA  
 ```{r }
 # section that notes the required packages needed to run the code
 library("httr")

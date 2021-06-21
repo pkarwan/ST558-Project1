@@ -46,16 +46,18 @@ suggest to use valid options, etc…
 ## List of Required libraries
 
 “httr” : httr is designed to map closely to the underlying http
-protocol. “jsonlite” : The jsonlite package is a JSON parser/generator
-optimized for the web. Its main strength is that it implements a
-bidirectional mapping between JSON data and the most important R data
-types. “dplyr” : dplyr provides the set of data manipulation tools,
-functions like group\_by, summarise,… “kableExtra” : kableExtra is a
-light weight table generator coming from ‘knitr’. “knitr” : knitr
-provides full control of the output without heavy coding work. I used
-for options to show the code chunks from RMarkdown and hide the
-warnings, messages generating from code with one liner coding.
-“summarytools”: I used summarytools to fetch min, max, Q1,… data
+protocol.  
+“jsonlite” : The jsonlite package is a JSON parser/generator optimized
+for the web. Its main strength is that it implements a bidirectional
+mapping between JSON data and the most important R data types.  
+“dplyr” : dplyr provides the set of data manipulation tools, functions
+like group\_by, summarise,…  
+“kableExtra” : kableExtra is a light weight table generator coming from
+‘knitr’.  
+“knitr” : knitr provides full control of the output without heavy coding
+work. I used for options to show the code chunks from RMarkdown and hide
+the warnings, messages generating from code with one liner coding.  
+“summarytools”: I used summarytools to fetch min, max, Q1,… data  
 “ggplot2” : Using ggplot2, I able to generate scatter plot, boxplot,
 histogram, bar chart for EDA
 
@@ -18005,7 +18007,7 @@ goli_12_box <- ggplot(data=goli_12_data, aes(x=data.activePlayer))
 goli_12_box + geom_bar(aes(fill= data.activePlayer), position = "dodge") + labs(title = "Active/inactive players Bar plot")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ### 2) Histogram Plot : Histogram Plot for goli 12 games played and win rate.
 
@@ -18016,7 +18018,7 @@ games are increasing, winning rate is decreasing.
 ggplot(goli_12_data, aes(x=data.gamesPlayed)) + geom_histogram(aes(y = ..density.., fill = winRate), bins = 26) + geom_density(adjust=0.4, alpha=0.4, color = "red", size = 2,outline.type="full", position = "stack") + labs(title="Histogram for Goli 12 win rate")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### 3) Scatterplot : Games Played vs Win Rate
 
@@ -18024,7 +18026,7 @@ Scatterplot is a good visualization tool. It is comparing games played
 vs win rate for goli 12.Win rate is seems to be decreased for Goli 12 as
 the number of games increased.
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ### 4) ScatterP Plot : Games played vs Wins
 
@@ -18036,7 +18038,7 @@ to create scatterplots.
 ggplot (goli_12_data, aes(x=data.gamesPlayed, y=data.wins, group=data.activePlayer)) + geom_point(aes(color= data.activePlayer)) + geom_smooth(method='lm', color='light blue') + ggtitle("Games played vs Wins")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ### 5) Box Plot: Boxplot of games played and losses by individual players
 
@@ -18048,7 +18050,7 @@ goli_12_box2<- ggplot(data= goli_12_data, aes(x=data.gamesPlayed, y= data.losses
 goli_12_box2 + geom_boxplot() + labs(title="Boxplot of games played and losses by individual players") + geom_jitter(aes(color=data.activePlayer))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### 6) Histogram Plot : Histogram for games Played
 
@@ -18063,4 +18065,4 @@ histogram1 + geom_histogram(binwidth = 10, aes(fill= data.activePlayer)) + labs(
   geom_density(adjust= 0.25, alpha=0.05)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
